@@ -1,7 +1,11 @@
-import {Schema} from 'mongoose';
+import {Schema, Model} from 'mongoose';
 import util from "util";
 import AppValidation from './app.validation';
 
+export interface modelType {
+  <T>(name: string, schema?: Schema<any>, collection?: string, skipInit?: boolean): Model<T>;
+  <T, U extends Model<T, TQueryHelpers, any>, TQueryHelpers = {}>(name: string, schema?: Schema<T, U>, collection?: string, skipInit?: boolean): U
+}
 
 /**
  * The Base types object where other types inherits or
@@ -29,7 +33,7 @@ function AppSchema(this: Record<string, any>, ...args: any) {
    *  @param {Model} model The password to compare against
    * @return {Object} The processor class instance object
    */
-  this.statics.getProcessor = (model: any) => {
+  this.statics.getProcessor = (model: modelType) => {
     // return new AppProcessor(model);
   };
 }

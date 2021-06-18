@@ -1,6 +1,3 @@
-import AppError from './app-error';
-import AppResponse from './app.response';
-
-export * from './query-parser';
-
-export default { AppError, AppResponse };
+export { AppError } from './app-error';
+export { AppResponse } from './app.response';
+export { QueryParser } from './query-parser';

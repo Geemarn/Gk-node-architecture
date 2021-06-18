@@ -1,4 +1,4 @@
-import AppError from '../../../utils/lib';
+import { AppError } from '../../../utils/lib';
 
 type T = Record<string, any>;
 

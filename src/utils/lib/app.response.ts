@@ -8,7 +8,7 @@ type T = Record<string, any>;
 /**
  * The AppResponse class
  */
-class AppResponse {
+export class AppResponse {
   /**
    * @param {Object} success the meta object
    * @return {Object} The success response object
@@ -36,4 +36,3 @@ class AppResponse {
   }
 }
 
-export default AppResponse;

@@ -12,7 +12,7 @@ type formatType = {
 /**
  * The App Error class
  */
-class AppError extends Error {
+export class AppError extends Error {
   _code: number;
   _type: number | undefined;
   _message: string;
@@ -100,4 +100,3 @@ class AppError extends Error {
   }
 }
 
-export default AppError;
