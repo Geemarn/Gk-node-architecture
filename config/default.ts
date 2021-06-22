@@ -16,6 +16,20 @@ type apiType = {
   versions: Array<number>;
   pagination: Record<'itemsPerPage', number>;
 };
+
+type emailType = {
+  mailOption: string,
+  from: string | undefined,
+  sendgrid: {
+    apiKey: string| undefined,
+    contactFormRecipient: string | undefined
+  },
+  mailgun: {
+    apiKey: string | undefined,
+    domain: string | undefined
+  }
+
+}
 const app: Omit<appType, 'mongodb'> = {
   appName: process.env.APP_NAME || 'Team Manager',
   environment: process.env.NODE_ENV || 'development',
@@ -29,6 +43,7 @@ const databases: Pick<appType, 'mongodb'> = {
   },
 };
 
+
 const api: apiType = {
   url: process.env.SERVICE_URL || 'http://127.0.0.1:8000/api/v1',
   lang: 'en',
@@ -39,8 +54,24 @@ const api: apiType = {
   },
 };
 
+
+
+const email: emailType = {
+  mailOption: 'sendgrid',
+    from: process.env.EMAIL_NO_REPLY,
+    sendgrid: {
+    apiKey: process.env.SENDGRID_API_KEY,
+      contactFormRecipient: process.env.CONTACT_FORM_EMAIL_RECIPIENT
+  },
+  mailgun: {
+    apiKey: process.env.MAILGUN_API_KEY,
+      domain: process.env.MAILGUN_DOMAIN
+  }
+};
+
 module.exports = {
   app,
   databases,
   api,
+  email
 };

@@ -1,6 +1,7 @@
 import { extend, isArray, omit } from 'lodash';
 import { AppResponse } from '../../../utils/lib';
 import { modelType } from './app.model';
+import EmailService from '../../../utils/email-service'
 
 type T = Record<string, any>;
 type apiResponseType = {
@@ -95,7 +96,7 @@ export default class AppProcessor {
   }: apiResponseType) {
     const meta: T = AppResponse.getSuccessMeta();
     if (code) {
-      extend(meta, {status_code: code});
+      extend(meta, { status_code: code });
     }
     if (message) {
       meta.message = message;
@@ -113,10 +114,21 @@ export default class AppProcessor {
     if (model.hiddenFields && model.hiddenFields.length > 0) {
       const isFunction = typeof value.toJSON === 'function';
       if (isArray(value)) {
-        value = value.map(v => omit((isFunction) ? v.toJSON() : v, ...model.hiddenFields));
+        value = value.map((v) =>
+          omit(isFunction ? v.toJSON() : v, ...model.hiddenFields)
+        );
       } else {
-        value = omit((isFunction) ? value.toJSON() : value, ...model.hiddenFields);
+        value = omit(
+          isFunction ? value.toJSON() : value,
+          ...model.hiddenFields
+        );
       }
+    }
+    if (email) {
+      await EmailService.sendEmail(email);
+    }
+    if (mobile) {
+      await AppSms.sendTwilioSms(mobile);
     }
   }
 }
