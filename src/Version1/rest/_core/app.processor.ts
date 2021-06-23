@@ -1,7 +1,6 @@
 import { extend, isArray, omit } from 'lodash';
-import { AppResponse } from '../../../utils/lib';
+import { AppResponse, EmailService, AppSms } from '../../../utils/lib';
 import { modelType } from './app.model';
-import EmailService from '../../../utils/email-service'
 
 type T = Record<string, any>;
 type apiResponseType = {
@@ -13,8 +12,8 @@ type apiResponseType = {
   pagination: T;
   count: number;
   token: string;
-  email: string;
-  mobile: string;
+  email: T;
+  mobile: T | Array<T>;
 };
 /**
  * The main processor class
@@ -130,5 +129,6 @@ export default class AppProcessor {
     if (mobile) {
       await AppSms.sendTwilioSms(mobile);
     }
+    return AppResponse.format(meta, value);
   }
 }
