@@ -2,13 +2,13 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import express, { Application, Response, Request } from 'express';
 import cors from 'cors';
+import http from 'http';
 import logger from 'morgan';
 import cookieParser from 'cookie-parser';
 import config from 'config';
 import initializeMongoDb from './database.config';
 import log from './utils/logger';
-import http from 'http';
-import { dbLogMessage } from './utils/helpers';
+import { dbLogError, dbLogMessage } from './utils/helpers';
 
 /** initialize app using express **/
 const app: Application = express();
@@ -38,9 +38,5 @@ export const database = initializeMongoDb()
       log.debug(dbLogMessage(server));
       return Promise.resolve(app);
     },
-    (err) => {
-      console.log('There was an un catch error : ');
-      console.log('==============================');
-      console.error(err);
-    }
+    (err) => log.debug(dbLogError(err))
   );
