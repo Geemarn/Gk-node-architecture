@@ -1,18 +1,12 @@
-import {Schema, Model} from 'mongoose';
-import util from "util";
+import { Schema } from 'mongoose';
+import util from 'util';
 import AppValidation from './app.validation';
-
-export interface modelType {
-  <T>(name: string, schema?: Schema<any>, collection?: string, skipInit?: boolean): Model<T>;
-  <T, U extends Model<T, TQueryHelpers, any>, TQueryHelpers = {}>(name: string, schema?: Schema<T, U>, collection?: string, skipInit?: boolean): U
-}
 
 /**
  * The Base types object where other types inherits or
  * overrides pre defined and static methods
  */
 function AppSchema(this: Record<string, any>, ...args: any) {
-
   // bind schema with argument with lexical this
   Schema.apply(this, args);
 
@@ -30,10 +24,10 @@ function AppSchema(this: Record<string, any>, ...args: any) {
   };
 
   /**
-   *  @param {Model} model The password to compare against
+   *  @param {Model} model
    * @return {Object} The processor class instance object
    */
-  this.statics.getProcessor = (model: modelType) => {
+  this.statics.getProcessor = (model: Record<string, any>) => {
     // return new AppProcessor(model);
   };
 }

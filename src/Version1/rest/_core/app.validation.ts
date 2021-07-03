@@ -11,7 +11,7 @@ class AppValidation {
    * @return {Object} Validator
    */
   async create(obj: T) {
-    return AppError.formatInputError({value: obj});
+    return AppError.formatInputError({ value: obj });
   }
 
   /**
@@ -19,9 +19,8 @@ class AppValidation {
    * @return {Object} Validator
    */
   async update(obj: T) {
-    return AppError.formatInputError({value: obj});
+    return AppError.formatInputError({ value: obj });
   }
-
 }
 
 export default AppValidation;

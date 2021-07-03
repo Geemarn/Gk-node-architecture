@@ -1,6 +1,5 @@
-import { extend, isArray, omit } from 'lodash';
+import { extend, isArray, isEmpty, omit, pick } from 'lodash';
 import { AppResponse, EmailService, AppSms } from '../../../utils/lib';
-import { modelType } from './app.model';
 
 type T = Record<string, any>;
 type apiResponseType = {
@@ -20,14 +19,14 @@ type apiResponseType = {
  * (this is where all business logic is been done, before been handled by the controller)
  */
 export default class AppProcessor {
-  model: modelType;
+  model: T | any;
 
   /**
    * @param {Model} model The default model object
    * for the controller. Will be required to create
    * an instance of the controller
    */
-  constructor(model: modelType) {
+  constructor(model: T) {
     this.model = model;
   }
 
@@ -130,5 +129,158 @@ export default class AppProcessor {
       await AppSms.sendTwilioSms(mobile);
     }
     return AppResponse.format(meta, value);
+  }
+
+  /**
+   * @param {Object} pagination The pagination object
+   * @param {Object} queryParser The query parser
+   * @return {Object}
+   */
+  async buildModelQueryObject(pagination: T, queryParser: T | null = null) {
+    let query = this.model.find(queryParser?.query);
+    if (
+      queryParser?.search &&
+      this.model.searchQuery(queryParser.search).length > 0
+    ) {
+      const searchQuery = this.model.searchQuery(queryParser.search);
+      queryParser.query = {
+        $or: [...searchQuery],
+        ...queryParser.query,
+      };
+      query = this.model.find({ ...queryParser.query });
+    }
+    if (!queryParser?.getAll) {
+      query = query.skip(pagination?.skip).limit(pagination?.perPage);
+    }
+    query = query.sort(
+      pagination && pagination.sort
+        ? Object.assign(pagination.sort, { createdAt: -1 })
+        : '-createdAt'
+    );
+    return {
+      value: await query.select(queryParser?.selection).exec(),
+      count: await this.model.countDocuments(queryParser?.query).exec(),
+    };
+  }
+
+  /**
+   * @param {Object} queryParser The query parser
+   * @return {Object}
+   */
+  async buildSearchQuery(queryParser: T | null = null) {
+    return omit(queryParser?.query, ['deleted']);
+  }
+
+  /**
+   * @param {Object} query The query object
+   * @return {Promise<Object>}
+   */
+  async countQueryDocuments(query: T) {
+    let count = await this.model.aggregate(query.concat([{ $count: 'total' }]));
+    count = count[0] ? count[0].total : 0;
+    return count;
+  }
+
+  /**
+   * @param {Object} pagination The pagination object
+   * @param {Object} query The query
+   * @param {Object} queryParser The query parser
+   * @return {Object}
+   */
+  async buildModelAggregateQueryObject(
+    pagination: T,
+    query: T,
+    queryParser: T | null = null
+  ) {
+    const count = await this.countQueryDocuments(query);
+    query.push({
+      $sort: queryParser?.sort
+        ? Object.assign({}, { ...queryParser?.sort, createdAt: -1 })
+        : { createdAt: -1 },
+    });
+    if (!queryParser?.getAll) {
+      query.push(
+        {
+          $skip: pagination.skip,
+        },
+        {
+          $limit: pagination.perPage,
+        }
+      );
+    }
+    return {
+      value: await this.model
+        .aggregate(query)
+        .collation({ locale: 'en', strength: 1 }),
+      count,
+    };
+  }
+
+  /**
+   * @param {Object} obj The payload object
+   * @param {Object} session The payload object
+   * @return {Object}
+   */
+  async createNewObject(obj: T, session = null) {
+    let payload = { ...obj };
+    const tofill = this.model.fillables;
+    if (tofill && tofill.length > 0) {
+      payload = pick(obj, ...tofill);
+    }
+    if (obj.user) {
+      payload.user = obj.user;
+    }
+    return new this.model(obj).save();
+  }
+
+  /**
+   * @param {Object} current The payload object
+   * @param {Object} obj The payload object
+   * @return {Object}
+   */
+  async updateObject(current: T, obj: T) {
+    const tofill = this.model.updateFillables || this.model.fillables;
+    if (tofill.length > 0) {
+      obj = pick(obj, ...tofill);
+    }
+    extend(current, obj);
+    return current.save();
+  }
+
+  /**
+   * @param {Object} req The request object
+   * @return {Promise<Object>}
+   */
+  async prepareBodyObject(req: T) {
+    let obj = Object.assign({}, req.body, req.params);
+    if (req.authId) {
+      const user = req.authId;
+      obj = Object.assign(obj, { user }, req.body);
+    }
+    return obj;
+  }
+
+  /**
+   * @param {Object} model The model object
+   * @param {Object} obj The request object
+   * @return {Promise<Object>}
+   */
+  async retrieveExistingResource(model: T, obj: T) {
+    if (model.uniques && !isEmpty(model.uniques)) {
+      const uniqueKeys = model.uniques;
+      const query: T = {};
+      for (const key of uniqueKeys) {
+        query[key] = obj[key];
+      }
+      const found = await model.findOne({
+        ...query,
+        deleted: false,
+        active: true,
+      });
+      if (found) {
+        return found;
+      }
+    }
+    return null;
   }
 }
