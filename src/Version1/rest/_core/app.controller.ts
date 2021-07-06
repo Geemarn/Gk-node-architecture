@@ -1,7 +1,15 @@
 import lang from '../../lang';
-import { BAD_REQUEST, CONFLICT, CREATED, NOT_FOUND, OK } from '../../../utils/constant';
+import {
+  BAD_REQUEST,
+  CONFLICT,
+  CREATED,
+  NOT_FOUND,
+  OK,
+} from '../../../utils/constant';
 import { AppError, QueryParser } from '../../../utils/lib';
-import { isEmpty } from 'lodash';
+import { extend, isEmpty } from 'lodash';
+import Pagination from '../../../utils/lib/pagination';
+import { pick } from 'query-string';
 
 type T = Record<string, any>;
 /**
@@ -10,13 +18,6 @@ type T = Record<string, any>;
 class AppController {
   model: T | any;
   lang: any;
-  // create: () => any;
-  // status: () => any;
-  // findOne: () => any;
-  // searchOne: () => any;
-  // find: () => any;
-  // update: () => any;
-  // delete: () => any;
 
   /**
    * @param {Model} model The default model object
@@ -40,7 +41,7 @@ class AppController {
    * @param {String} id The id from the url parameter
    * @return {Object} res The response object
    */
-  id = async (req: T, res: T, next: (appError?: any) => void, id: String) => {
+  async id(req: T, res: T, next: (appError?: any) => void, id: String) {
     let request = this.model.findOne({ _id: id, deleted: false });
     try {
       let object = await request;
@@ -53,7 +54,7 @@ class AppController {
     } catch (err) {
       return next(err);
     }
-  };
+  }
 
   /**
    * @param {Object} req The request object
@@ -61,7 +62,7 @@ class AppController {
    * @param {Function} next The callback to the next program handler
    * @return {Object} The response object
    */
-  searchOne = async (req: T, res: T, next: () => void) => {
+  async searchOne(req: T, res: T, next: () => void) {
     const processor = this.model.getProcessor(this.model);
     const queryParser = new QueryParser(Object.assign({}, req.query));
     const query = await processor.buildSearchQuery(queryParser);
@@ -76,7 +77,7 @@ class AppController {
       value: object == null ? {} : object,
     };
     return next();
-  };
+  }
 
   /**
    * @param {Object} req The request object
@@ -100,12 +101,14 @@ class AppController {
    * @param {Function} next The callback to the next program handler
    * @return {Object} res The response object
    */
-   create = async(req: T, res: T, next: (err?: any) => void) => {
+  async create(req: T, res: T, next: (err?: any) => void) {
     try {
       const processor = this.model.getProcessor(this.model);
       const validate = await this.model.getValidator().create(req.body);
       if (!validate.passed) {
-        return next(new AppError(lang.get('error').inputs, BAD_REQUEST, validate.errors));
+        return next(
+          new AppError(lang.get('error').inputs, BAD_REQUEST, validate.errors)
+        );
       }
       const obj = await processor.prepareBodyObject(req);
       let object = await processor.retrieveExistingResource(this.model, obj);
@@ -116,12 +119,18 @@ class AppController {
             message: this.lang.created,
             model: this.model,
             code: CREATED,
-            value: object
+            value: object,
           };
           return next();
         } else {
-          const messageObj = this.model.uniques.map((m: string) => ({[m]: `${m} must be unique`}));
-          const appError = new AppError(lang.get('error').resource_already_exist, CONFLICT, messageObj);
+          const messageObj = this.model.uniques.map((m: string) => ({
+            [m]: `${m} must be unique`,
+          }));
+          const appError = new AppError(
+            lang.get('error').resource_already_exist,
+            CONFLICT,
+            messageObj
+          );
           return next(appError);
         }
       } else {
@@ -135,11 +144,11 @@ class AppController {
         message: this.lang.created,
         model: this.model,
         code: CREATED,
-        value: await object
+        value: await object,
       };
       const postCreate = await processor.postCreateResponse(object, {
         userId: req.userId,
-        model: this.model.collection.collectionName
+        model: this.model.collection.collectionName,
       });
       if (postCreate) {
         req.response = Object.assign({}, req.response, postCreate);
@@ -150,4 +159,156 @@ class AppController {
     }
   }
 
+  /**
+   * @param {Object} req The request object
+   * @param {Object} res The response object
+   * @param {Function} next The callback to the next program handler
+   * @return {Object} The response object
+   */
+  async find(req: T, res: T, next: (err?: any) => void) {
+    const queryParser = new QueryParser(Object.assign({}, req.query));
+    const pagination = new Pagination(req.originalUrl);
+    const processor = this.model.getProcessor(this.model);
+    try {
+      const { value, count } = await processor.buildModelQueryObject(
+        pagination,
+        queryParser
+      );
+      req.response = {
+        model: this.model,
+        code: OK,
+        value,
+        count,
+        queryParser,
+        pagination,
+      };
+      return next();
+    } catch (err) {
+      return next(err);
+    }
+  }
+
+  /**
+   * @param {Object} req The request object
+   * @param {Object} res The response object
+   * @param {Function} next The callback to the next program handler
+   * @return {Object} res The response object
+   */
+  async update(req: T, res: T, next: (err?: any) => void) {
+    try {
+      const processor = this.model.getProcessor(this.model);
+      let object = req.object;
+      const obj = await processor.prepareBodyObject(req);
+      const validate = await this.model.getValidator().update(obj);
+      if (!validate.passed) {
+        const error = new AppError(
+          lang.get('error').inputs,
+          BAD_REQUEST,
+          validate.errors
+        );
+        return next(error);
+      }
+      if (
+        this.model.uniques &&
+        this.model.uniques.length > 0 &&
+        !isEmpty(pick(obj, this.model.uniques))
+      ) {
+        let found = await processor.retrieveExistingResource(this.model, obj);
+        if (found) {
+          const messageObj = this.model.uniques.map((m: string) => ({
+            [m]: `${m} must be unique`,
+          }));
+          const appError = new AppError(
+            lang.get('error').resource_already_exist,
+            CONFLICT,
+            messageObj
+          );
+          return next(appError);
+        }
+      }
+      let canUpdateError = await processor.validateUpdate(object, obj);
+      if (!isEmpty(canUpdateError)) {
+        return next(canUpdateError);
+      }
+      object = await processor.updateObject(object, obj);
+      req.response = {
+        model: this.model,
+        code: OK,
+        message: this.lang.updated,
+        value: object,
+      };
+      const postUpdate = await processor.postUpdateResponse(
+        object,
+        req.response
+      );
+      if (postUpdate) {
+        req.response = Object.assign({}, req.response, postUpdate);
+      }
+      return next();
+    } catch (err) {
+      return next(err);
+    }
+  }
+
+  /**
+   * @param {Object} req The request object
+   * @param {Object} res The response object
+   * @param {Function} next The callback to the next program handler
+   * @return {Object} res The response object
+   */
+  async status(req: T, res: T, next: (err?: any) => void) {
+    let object = req.object;
+    object.active = req.params['status'];
+    try {
+      req.response = {
+        model: this.model,
+        code: OK,
+        message: this.lang.updated,
+        value: await object.save(),
+      };
+      return next();
+    } catch (err) {
+      return next(err);
+    }
+  }
+
+  /**
+   * @param {Object} req The request object
+   * @param {Object} res The response object
+   * @param {Function} next The callback to the next program handler
+   * @return {Object} The response object
+   */
+  async delete(req: T, res: T, next: (err?: any) => void) {
+    let object = req.object;
+    try {
+      const processor = this.model.getProcessor(this.model);
+      let canDeleteError = await processor.validateDelete(object);
+      if (!isEmpty(canDeleteError)) {
+        return next(canDeleteError);
+      }
+      if (this.model.softDelete) {
+        extend(object, { deleted: true });
+        object = await object.save();
+      } else {
+        object = await object.remove();
+      }
+      req.response = {
+        model: this.model,
+        code: OK,
+        value: { _id: object._id },
+        message: this.lang.deleted,
+      };
+      const postDelete = await processor.postDeleteResponse(object, {
+        userId: req.userId,
+        model: this.model.collection.collectionName,
+      });
+      if (postDelete) {
+        req.response = Object.assign({}, req.response, postDelete);
+      }
+      return next();
+
+    } catch (err) {
+      return next(err);
+    }
+  }
 }

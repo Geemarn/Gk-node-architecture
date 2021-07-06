@@ -5,6 +5,7 @@ type appType = {
   appName: string;
   environment: string;
   apiHost: string;
+  baseUrl: string;
   port: string | number;
   mongodb: Record<'test', string | undefined>;
 };
@@ -34,6 +35,7 @@ const app: Omit<appType, 'mongodb'> = {
   appName: process.env.APP_NAME || 'Team Manager',
   environment: process.env.NODE_ENV || 'development',
   apiHost: `http://localhost:${PORT}`,
+  baseUrl: `http://localhost:${PORT}`,
   port: PORT,
 };
 
