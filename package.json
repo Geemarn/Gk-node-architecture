@@ -49,6 +49,7 @@
     "mailgun-js": "^0.22.0",
     "mongoose": "^5.12.14",
     "morgan": "^1.10.0",
+    "query-string": "^7.0.1",
     "regenerator-runtime": "^0.13.7",
     "twilio": "^3.64.0",
     "winston": "^3.3.3"

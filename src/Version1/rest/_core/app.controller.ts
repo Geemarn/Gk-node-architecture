@@ -150,4 +150,30 @@ class AppController {
     }
   }
 
+  /**
+   * @param {Object} req The request object
+   * @param {Object} res The response object
+   * @param {Function} next The callback to the next program handler
+   * @return {Object} The response object
+   */
+   find = async(req: T, res: T, next: (err?: any) => void) => {
+    const queryParser = new QueryParser(Object.assign({}, req.query));
+    const pagination = new Pagination(req.originalUrl);
+    const processor = this.model.getProcessor(this.model);
+    try {
+      const {value, count} = await processor.buildModelQueryObject(pagination, queryParser);
+      req.response = {
+        model: this.model,
+        code: OK,
+        value,
+        count,
+        queryParser,
+        pagination
+      };
+      return next();
+    } catch (err) {
+      return next(err);
+    }
+  }
+
 }
