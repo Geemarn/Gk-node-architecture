@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose';
 import util from 'util';
-import AppValidation from './app.validation';
 import { modelType } from '../types';
+import { AppProcessor, AppValidation } from './index';
 
 /**
  * The Base types object where other types inherits or
@@ -29,7 +29,7 @@ function AppSchema(this: any, ...args: any) {
    * @return {Object} The processor class instance object
    */
   this.statics.getProcessor = (model: modelType) => {
-    // return new AppProcessor(model);
+    return new AppProcessor(model);
   };
 }
 

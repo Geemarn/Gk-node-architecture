@@ -1,19 +1,7 @@
 import { extend, isArray, isEmpty, omit, pick } from 'lodash';
 import { AppResponse, EmailService, AppSms } from '../../../utils/lib';
-import { modelType, T } from '../types';
+import { apiResponseType, modelType, T } from '../types';
 
-type apiResponseType = {
-  model: T;
-  value: T;
-  code: number;
-  message: string | T;
-  queryParser: T;
-  pagination: T;
-  count: number;
-  token: string;
-  email: T;
-  mobile: T | Array<T>;
-};
 /**
  * The main processor class
  * (this is where all business logic is been done, before been handled by the controller)
@@ -93,6 +81,9 @@ export default class AppProcessor {
     mobile,
   }: apiResponseType) {
     const meta: T = AppResponse.getSuccessMeta();
+    if (token) {
+      meta.token = token;
+    }
     if (code) {
       extend(meta, { status_code: code });
     }
@@ -230,7 +221,7 @@ export default class AppProcessor {
     if (obj.user) {
       payload.user = obj.user;
     }
-    return new this.model(obj).save();
+    return new this.model(payload).save();
   }
 
   /**
@@ -265,7 +256,7 @@ export default class AppProcessor {
    * @param {Object} obj The request object
    * @return {Promise<Object>}
    */
-  async retrieveExistingResource(model: T, obj: T) {
+  async retrieveExistingResource(model: modelType, obj: T) {
     if (model.uniques && !isEmpty(model.uniques)) {
       const uniqueKeys = model.uniques;
       const query: T = {};

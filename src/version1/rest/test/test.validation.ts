@@ -13,7 +13,6 @@ class TestValidation<T> extends AppValidation {
   create(obj: Record<string, any>) {
     const rules = {
       name: 'required|string',
-      price: 'required|numeric',
     };
     const validator = new Validator(obj, rules);
     return {

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { RequestHandler, Router } from 'express';
 import Test from './test.model';
 import TestController from './test.controller';
 import { response } from '../../../midddleware';

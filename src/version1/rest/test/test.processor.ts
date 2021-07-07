@@ -1,7 +1,6 @@
 import { AppProcessor } from '../_core';
 import { pick, extend } from 'lodash';
-
-type T = Record<string, any>;
+import { T } from '../types';
 
 /**
  * The ModuleProcessor class
