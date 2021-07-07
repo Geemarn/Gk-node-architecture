@@ -4,7 +4,7 @@ import AppValidation from '../_core/app.validation';
 /**
  * The User Validation class
  */
-class TestValidation extends AppValidation {
+class SampleValidation extends AppValidation {
   /**
    * @param {Object} obj The object to validate
    * @return {Object} Validator
@@ -22,4 +22,4 @@ class TestValidation extends AppValidation {
   }
 }
 
-export default TestValidation;
+export default SampleValidation;

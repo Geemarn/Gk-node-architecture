@@ -1,6 +1,7 @@
 require('dotenv').config();
 const PORT = process.env.PORT || 3000;
 
+/** Types **/
 type appType = {
   appName: string;
   environment: string;
@@ -29,8 +30,9 @@ type emailType = {
     apiKey: string | undefined,
     domain: string | undefined
   }
-
 }
+/**  **/
+
 const app: Omit<appType, 'mongodb'> = {
   appName: process.env.APP_NAME || 'Team Manager',
   environment: process.env.NODE_ENV || 'development',
@@ -45,7 +47,6 @@ const databases: Pick<appType, 'mongodb'> = {
   },
 };
 
-
 const api: apiType = {
   url: process.env.SERVICE_URL || 'http://127.0.0.1:8000/api/v1',
   lang: 'en',
@@ -55,8 +56,6 @@ const api: apiType = {
     itemsPerPage: 10,
   },
 };
-
-
 
 const email: emailType = {
   mailOption: 'sendgrid',

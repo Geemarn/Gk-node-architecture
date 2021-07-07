@@ -1,9 +1,9 @@
-import test from './rest/test/test.route';
+import sample from './rest/sample/sample.route';
 
 import { Router } from 'express';
 const router = Router();
 
-router.use(test);
+router.use(sample);
 
 //export router
 export default router;

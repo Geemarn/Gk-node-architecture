@@ -6,7 +6,7 @@ type T = Record<string, any>;
 /**
  * The Pagination class
  */
-class Pagination {
+export class Pagination {
   pagination: T;
   urlObj: T;
   query: T;
@@ -142,8 +142,3 @@ class Pagination {
   }
 }
 
-/**
- * @typedef Pagination
- */
-
-export default Pagination;

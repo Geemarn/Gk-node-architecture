@@ -4,10 +4,10 @@
 import mongoose from 'mongoose';
 import { AppSchema } from '../_core';
 import { modelType } from '../types';
-import TestValidation from './test.validation';
-import TestProcessor from './test.processor';
+import SampleValidation from './sample.validation';
+import SampleProcessor from './sample.processor';
 
-const TestModel = new (AppSchema as any)(
+const SampleModel = new (AppSchema as any)(
   {
     name: {
       type: String,
@@ -32,19 +32,19 @@ const TestModel = new (AppSchema as any)(
 /**
  * @return {Object} The validator object with the specified rules.
  */
-TestModel.statics.getValidator = () => {
-  return new TestValidation();
+SampleModel.statics.getValidator = () => {
+  return new SampleValidation();
 };
 
 /**
  * @param {Model} model required for response
  * @return {Object} The processor class instance object
  */
-TestModel.statics.getProcessor = (model: modelType) => {
-  return new TestProcessor(model);
+SampleModel.statics.getProcessor = (model: modelType) => {
+  return new SampleProcessor(model);
 };
 
 /**
- * @typedef TestModel
+ * @typedef SampleModel
  */
-export default mongoose.model('Test', TestModel);
+export default mongoose.model('Sample', SampleModel);

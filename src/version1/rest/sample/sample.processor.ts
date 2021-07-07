@@ -5,7 +5,7 @@ import { T } from '../types';
 /**
  * The ModuleProcessor class
  */
-class TestProcessor extends AppProcessor {
+class SampleProcessor extends AppProcessor {
   /**
    * @param {Object} current The payload object
    * @param {Object} obj The payload object
@@ -27,4 +27,4 @@ class TestProcessor extends AppProcessor {
   }
 }
 
-export default TestProcessor;
+export default SampleProcessor;

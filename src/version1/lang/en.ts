@@ -43,11 +43,11 @@ export default {
     username_exist: 'Username already exist',
     psnId_exist: 'psnId already exist',
   },
-  tests: {
-    created: 'Tests successfully created',
-    updated: 'Tests successfully updated',
-    deleted: 'Tests successfully deleted',
-    not_found: 'Tests not found',
+  samples: {
+    created: 'Samples successfully created',
+    updated: 'Samples successfully updated',
+    deleted: 'Samples successfully deleted',
+    not_found: 'Samples not found',
   },
   logs: {
     created: 'Log successfully created',

@@ -8,7 +8,7 @@ import { modelType } from '../types';
  *  TestController
  */
 
-export default class TestController extends AppController {
+export default class SampleController extends AppController {
   /**
    * @param {Model} model The default model object
    * for the controller. Will be required to create

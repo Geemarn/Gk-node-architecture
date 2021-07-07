@@ -8,7 +8,6 @@ import { NOT_FOUND } from './utils/constant';
 import { T } from './version1/rest/types';
 
 
-
 const prefix: (string | RegExp)[] = config.get('api.prefix');
 
 /**

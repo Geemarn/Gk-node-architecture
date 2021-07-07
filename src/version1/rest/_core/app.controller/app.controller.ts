@@ -7,9 +7,8 @@ import {
   NOT_FOUND,
   OK,
 } from '../../../../utils/constant';
-import { AppError, QueryParser } from '../../../../utils/lib';
+import { AppError, QueryParser, Pagination } from '../../../../utils/lib';
 import { extend, isEmpty } from 'lodash';
-import Pagination from '../../../../utils/lib/pagination';
 import { pick } from 'query-string';
 import { modelType } from '../../types';
 
