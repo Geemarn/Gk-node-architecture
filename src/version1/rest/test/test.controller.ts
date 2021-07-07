@@ -1,7 +1,7 @@
 /**
  * The TestController class
  */
-import AppController from '../_core/app.controller';
+import AppController from '../_core/app.controller/app.controller';
 import { modelType } from '../types';
 
 /**

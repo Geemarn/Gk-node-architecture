@@ -17,6 +17,7 @@ router.param('id', _testCtrl.id, response);
 router
   .route('/tests/:id')
   .get(_testCtrl.findOne, response)
-  .put(_testCtrl.update, response);
+  .put(_testCtrl.update, response)
+  .delete(_testCtrl.delete, response);
 
 export default router;

@@ -1,6 +1,6 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
-import express, { Application, Response, Request } from 'express';
+import express, { Application } from 'express';
 import cors from 'cors';
 import http from 'http';
 import logger from 'morgan';
@@ -22,13 +22,13 @@ app.use(cookieParser());
 app.use(cors());
 
 /** set app port **/
-app.set('port', config.get('app.port'));
+app.set('port', config.get<string>('app.port'));
 
 /** initialize mongo db using mongoose **/
 export default initializeMongoDb()
   .then(() => {
     log.debug(
-      `\n \t***Database loaded*** \n \tUrl => ${config.get(
+      `\n \t***Database loaded*** \n \tUrl => ${config.get<string>(
         'databases.mongodb.test'
       )}`
     );

@@ -1,4 +1,4 @@
-import lang from '../../lang/index';
+import lang from '../../../lang';
 import { Request, Response, NextFunction } from 'express';
 import {
   BAD_REQUEST,
@@ -6,12 +6,12 @@ import {
   CREATED,
   NOT_FOUND,
   OK,
-} from '../../../utils/constant';
-import { AppError, QueryParser } from '../../../utils/lib';
+} from '../../../../utils/constant';
+import { AppError, QueryParser } from '../../../../utils/lib';
 import { extend, isEmpty } from 'lodash';
-import Pagination from '../../../utils/lib/pagination';
+import Pagination from '../../../../utils/lib/pagination';
 import { pick } from 'query-string';
-import { modelType } from '../types';
+import { modelType } from '../../types';
 
 /**
  * The App controller class
@@ -145,7 +145,10 @@ class AppController {
         );
       }
       const _obj = await processor.prepareBodyObject(req);
-      let _retrievedObj = await processor.retrieveExistingResource(this.model, _obj);
+      let _retrievedObj = await processor.retrieveExistingResource(
+        this.model,
+        _obj
+      );
 
       if (_retrievedObj) {
         const _returnDuplicateObj = this.model.returnDuplicate;
@@ -174,8 +177,6 @@ class AppController {
           return next(checkError);
         }
         _retrievedObj = await processor.createNewObject(_obj);
-        console.log('_retrievedObj::::req', _retrievedObj);
-
       }
       req.response = {
         message: this.lang.created,
@@ -205,9 +206,9 @@ class AppController {
   update = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const processor = this.model.getProcessor(this.model);
-      let object = req.object;
-      const obj = await processor.prepareBodyObject(req);
-      const validate = await this.model.getValidator().update(obj);
+      let _object = req.object;
+      const _obj = await processor.prepareBodyObject(req);
+      const validate = await this.model.getValidator().update(_obj);
       if (!validate.passed) {
         const error = new AppError(
           lang.get('error').inputs,
@@ -219,9 +220,9 @@ class AppController {
       if (
         this.model.uniques &&
         this.model.uniques.length > 0 &&
-        !isEmpty(pick(obj, this.model.uniques))
+        !isEmpty(pick(_obj, this.model.uniques))
       ) {
-        let found = await processor.retrieveExistingResource(this.model, obj);
+        let found = await processor.retrieveExistingResource(this.model, _obj);
         if (found) {
           const messageObj = this.model.uniques.map((m: string) => ({
             [m]: `${m} must be unique`,
@@ -234,24 +235,24 @@ class AppController {
           return next(appError);
         }
       }
-      let canUpdateError = await processor.validateUpdate(object, obj);
+      let canUpdateError = await processor.validateUpdate(_object, _obj);
       if (!isEmpty(canUpdateError)) {
         return next(canUpdateError);
       }
-      object = await processor.updateObject(object, obj);
+      _object = await processor.updateObject(_object, _obj);
       req.response = {
         model: this.model,
         code: OK,
         message: this.lang.updated,
-        value: object,
+        value: _object,
       };
-      const postUpdate = await processor.postUpdateResponse(
-        object,
-        req.response
-      );
-      if (postUpdate) {
-        req.response = Object.assign({}, req.response, postUpdate);
-      }
+      // const postUpdate = await processor.postUpdateResponse(
+      //   object,
+      //   req.response
+      // );
+      // if (postUpdate) {
+      //   req.response = Object.assign({}, req.response, postUpdate);
+      // }
       return next();
     } catch (err) {
       return next(err);
@@ -306,13 +307,13 @@ class AppController {
         value: { _id: object._id },
         message: this.lang.deleted,
       };
-      const postDelete = await processor.postDeleteResponse(object, {
-        userId: req.userId,
-        model: this.model.collection.collectionName,
-      });
-      if (postDelete) {
-        req.response = Object.assign({}, req.response, postDelete);
-      }
+      // const postDelete = await processor.postDeleteResponse(object, {
+      //   userId: req.userId,
+      //   model: this.model.collection.collectionName,
+      // });
+      // if (postDelete) {
+      //   req.response = Object.assign({}, req.response, postDelete);
+      // }
       return next();
     } catch (err) {
       return next(err);
