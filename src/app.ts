@@ -9,6 +9,7 @@ import config from 'config';
 import initializeMongoDb from './database.config';
 import log from './utils/logger';
 import { dbLogError, dbLogMessage } from './utils/helpers';
+import loadRoutes from './routing';
 
 /** initialize app using express **/
 const app: Application = express();
@@ -24,15 +25,18 @@ app.use(cors());
 app.set('port', config.get('app.port'));
 
 /** initialize mongo db using mongoose **/
-export const database = initializeMongoDb()
+export default initializeMongoDb()
   .then(() => {
-    return app.get('/', (req: Request, res: Response) => {
-      res.send({ hello: 'world' });
-    });
+    log.debug(
+      `\n \t***Database loaded*** \n \tUrl => ${config.get(
+        'databases.mongodb.test'
+      )}`
+    );
+    return loadRoutes(app);
   })
   .then(
     async (app: Application) => {
-      const server: Record<string, any> = await http
+      const server = await http
         .createServer(app)
         .listen(config.get('app.port'));
       log.debug(dbLogMessage(server));

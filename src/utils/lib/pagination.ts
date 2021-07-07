@@ -131,7 +131,7 @@ class Pagination {
    * @return {Boolean}
    */
   morePages(count: number) {
-    return count > (this._perPage * this._current);
+    return count > this._perPage * this._current;
   }
 
   /**
@@ -141,7 +141,6 @@ class Pagination {
     return this.pagination;
   }
 }
-
 
 /**
  * @typedef Pagination

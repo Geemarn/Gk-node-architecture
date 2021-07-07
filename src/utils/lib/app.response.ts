@@ -35,4 +35,3 @@ export class AppResponse {
     return response;
   }
 }
-

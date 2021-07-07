@@ -1,7 +1,7 @@
 import { extend, isArray, isEmpty, omit, pick } from 'lodash';
 import { AppResponse, EmailService, AppSms } from '../../../utils/lib';
+import { modelType, T } from '../types';
 
-type T = Record<string, any>;
 type apiResponseType = {
   model: T;
   value: T;
@@ -26,7 +26,7 @@ export default class AppProcessor {
    * for the controller. Will be required to create
    * an instance of the controller
    */
-  constructor(model: T) {
+  constructor(model: modelType) {
     this.model = model;
   }
 

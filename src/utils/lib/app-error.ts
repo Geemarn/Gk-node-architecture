@@ -99,4 +99,3 @@ export class AppError extends Error {
     return obj;
   }
 }
-

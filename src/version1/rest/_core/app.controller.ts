@@ -1,4 +1,4 @@
-import lang from '../../lang';
+import lang from '../../lang/index';
 import {
   BAD_REQUEST,
   CONFLICT,
@@ -10,13 +10,13 @@ import { AppError, QueryParser } from '../../../utils/lib';
 import { extend, isEmpty } from 'lodash';
 import Pagination from '../../../utils/lib/pagination';
 import { pick } from 'query-string';
+import { modelType, T } from '../types';
 
-type T = Record<string, any>;
 /**
  * The App controller class
  */
 class AppController {
-  model: T | any;
+  model: modelType;
   lang: any;
 
   /**
@@ -24,7 +24,7 @@ class AppController {
    * for the controller. Will be required to create
    * an instance of the controller
    */
-  constructor(model: T) {
+  constructor(model: modelType) {
     if (new.target === AppController) {
       throw new TypeError('Cannot construct Abstract instances directly');
     }
@@ -166,6 +166,7 @@ class AppController {
    * @return {Object} The response object
    */
   async find(req: T, res: T, next: (err?: any) => void) {
+    console.log('req::::::::, res', req, res);
     const queryParser = new QueryParser(Object.assign({}, req.query));
     const pagination = new Pagination(req.originalUrl);
     const processor = this.model.getProcessor(this.model);
@@ -306,9 +307,10 @@ class AppController {
         req.response = Object.assign({}, req.response, postDelete);
       }
       return next();
-
     } catch (err) {
       return next(err);
     }
   }
 }
+
+export default AppController;

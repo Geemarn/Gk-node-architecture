@@ -1,12 +1,13 @@
 import { Schema } from 'mongoose';
 import util from 'util';
 import AppValidation from './app.validation';
+import { modelType } from '../types';
 
 /**
  * The Base types object where other types inherits or
  * overrides pre defined and static methods
  */
-function AppSchema(this: Record<string, any>, ...args: any) {
+function AppSchema(this: any, ...args: any) {
   // bind schema with argument with lexical this
   Schema.apply(this, args);
 
@@ -27,7 +28,7 @@ function AppSchema(this: Record<string, any>, ...args: any) {
    *  @param {Model} model
    * @return {Object} The processor class instance object
    */
-  this.statics.getProcessor = (model: Record<string, any>) => {
+  this.statics.getProcessor = (model: modelType) => {
     // return new AppProcessor(model);
   };
 }

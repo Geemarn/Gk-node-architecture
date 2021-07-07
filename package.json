@@ -24,6 +24,7 @@
     "@types/mailgun-js": "^0.22.11",
     "@types/mongoose": "^5.11.97",
     "@types/node": "^15.12.2",
+    "@types/validatorjs": "^3.15.0",
     "@typescript-eslint/eslint-plugin": "^4.27.0",
     "@typescript-eslint/parser": "^4.27.0",
     "eslint": "^7.28.0",
@@ -53,6 +54,7 @@
     "query-string": "^7.0.1",
     "regenerator-runtime": "^0.13.7",
     "twilio": "^3.64.0",
+    "validatorjs": "^3.22.1",
     "winston": "^3.3.3"
   }
 }

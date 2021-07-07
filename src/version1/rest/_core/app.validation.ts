@@ -1,6 +1,5 @@
 import { AppError } from '../../../utils/lib';
-
-type T = Record<string, any>;
+import { T } from '../types';
 
 /**
  * The App Validation class (Do all your default validation here
