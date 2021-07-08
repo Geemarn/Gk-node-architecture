@@ -2,8 +2,7 @@
  * The AppResponse class
  */
 import { OK } from '../constant';
-
-type T = Record<string, any>;
+import { T } from '../../version1/rest/types';
 
 /**
  * The AppResponse class
@@ -35,4 +34,3 @@ export class AppResponse {
     return response;
   }
 }
-

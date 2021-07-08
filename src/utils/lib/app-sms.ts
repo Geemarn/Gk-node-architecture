@@ -1,8 +1,5 @@
-import {Twilio} from 'twilio';
-import {
-  TWILIO_SENDER_NAME,
-  TWILIO_USE_SENDER_NAME_FOR,
-} from '../constant';
+import { Twilio } from 'twilio';
+import { TWILIO_SENDER_NAME, TWILIO_USE_SENDER_NAME_FOR } from '../constant';
 
 type T = Record<string, any>;
 
@@ -81,4 +78,4 @@ export class AppSms {
     }
     return mobileNo;
   };
-};
+}

@@ -1,22 +1,22 @@
-import lang from '../../lang';
+import lang from '../../../lang';
+import { Request, Response, NextFunction } from 'express';
 import {
   BAD_REQUEST,
   CONFLICT,
   CREATED,
   NOT_FOUND,
   OK,
-} from '../../../utils/constant';
-import { AppError, QueryParser } from '../../../utils/lib';
+} from '../../../../utils/constant';
+import { AppError, QueryParser, Pagination } from '../../../../utils/lib';
 import { extend, isEmpty } from 'lodash';
-import Pagination from '../../../utils/lib/pagination';
 import { pick } from 'query-string';
+import { modelType } from '../../types';
 
-type T = Record<string, any>;
 /**
  * The App controller class
  */
 class AppController {
-  model: T | any;
+  model: modelType;
   lang: any;
 
   /**
@@ -24,7 +24,7 @@ class AppController {
    * for the controller. Will be required to create
    * an instance of the controller
    */
-  constructor(model: T) {
+  constructor(model: modelType) {
     if (new.target === AppController) {
       throw new TypeError('Cannot construct Abstract instances directly');
     }
@@ -41,7 +41,7 @@ class AppController {
    * @param {String} id The id from the url parameter
    * @return {Object} res The response object
    */
-  async id(req: T, res: T, next: (appError?: any) => void, id: String) {
+  id = async (req: Request, res: Response, next: NextFunction, id: String) => {
     let request = this.model.findOne({ _id: id, deleted: false });
     try {
       let object = await request;
@@ -54,7 +54,7 @@ class AppController {
     } catch (err) {
       return next(err);
     }
-  }
+  };
 
   /**
    * @param {Object} req The request object
@@ -62,7 +62,7 @@ class AppController {
    * @param {Function} next The callback to the next program handler
    * @return {Object} The response object
    */
-  async searchOne(req: T, res: T, next: () => void) {
+  searchOne = async (req: Request, res: Response, next: NextFunction) => {
     const processor = this.model.getProcessor(this.model);
     const queryParser = new QueryParser(Object.assign({}, req.query));
     const query = await processor.buildSearchQuery(queryParser);
@@ -77,7 +77,7 @@ class AppController {
       value: object == null ? {} : object,
     };
     return next();
-  }
+  };
 
   /**
    * @param {Object} req The request object
@@ -85,7 +85,7 @@ class AppController {
    * @param {Function} next The callback to the next program handler
    * @return {Object} The response object
    */
-  async findOne(req: T, res: T, next: () => void) {
+  findOne = async (req: Request, res: Response, next: NextFunction) => {
     let object = req.object;
     req.response = {
       model: this.model,
@@ -93,71 +93,7 @@ class AppController {
       value: object,
     };
     return next();
-  }
-
-  /**
-   * @param {Object} req The request object
-   * @param {Object} res The response object
-   * @param {Function} next The callback to the next program handler
-   * @return {Object} res The response object
-   */
-  async create(req: T, res: T, next: (err?: any) => void) {
-    try {
-      const processor = this.model.getProcessor(this.model);
-      const validate = await this.model.getValidator().create(req.body);
-      if (!validate.passed) {
-        return next(
-          new AppError(lang.get('error').inputs, BAD_REQUEST, validate.errors)
-        );
-      }
-      const obj = await processor.prepareBodyObject(req);
-      let object = await processor.retrieveExistingResource(this.model, obj);
-      if (object) {
-        const returnIfFound = this.model.returnDuplicate;
-        if (returnIfFound) {
-          req.response = {
-            message: this.lang.created,
-            model: this.model,
-            code: CREATED,
-            value: object,
-          };
-          return next();
-        } else {
-          const messageObj = this.model.uniques.map((m: string) => ({
-            [m]: `${m} must be unique`,
-          }));
-          const appError = new AppError(
-            lang.get('error').resource_already_exist,
-            CONFLICT,
-            messageObj
-          );
-          return next(appError);
-        }
-      } else {
-        let checkError = await processor.validateCreate(obj);
-        if (checkError) {
-          return next(checkError);
-        }
-        object = await processor.createNewObject(obj);
-      }
-      req.response = {
-        message: this.lang.created,
-        model: this.model,
-        code: CREATED,
-        value: await object,
-      };
-      const postCreate = await processor.postCreateResponse(object, {
-        userId: req.userId,
-        model: this.model.collection.collectionName,
-      });
-      if (postCreate) {
-        req.response = Object.assign({}, req.response, postCreate);
-      }
-      return next();
-    } catch (err) {
-      return next(err);
-    }
-  }
+  };
 
   /**
    * @param {Object} req The request object
@@ -165,10 +101,13 @@ class AppController {
    * @param {Function} next The callback to the next program handler
    * @return {Object} The response object
    */
-  async find(req: T, res: T, next: (err?: any) => void) {
+  find = async (req: Request, res: Response, next: NextFunction) => {
     const queryParser = new QueryParser(Object.assign({}, req.query));
+
     const pagination = new Pagination(req.originalUrl);
+
     const processor = this.model.getProcessor(this.model);
+
     try {
       const { value, count } = await processor.buildModelQueryObject(
         pagination,
@@ -186,7 +125,7 @@ class AppController {
     } catch (err) {
       return next(err);
     }
-  }
+  };
 
   /**
    * @param {Object} req The request object
@@ -194,12 +133,81 @@ class AppController {
    * @param {Function} next The callback to the next program handler
    * @return {Object} res The response object
    */
-  async update(req: T, res: T, next: (err?: any) => void) {
+  create = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const processor = this.model.getProcessor(this.model);
-      let object = req.object;
-      const obj = await processor.prepareBodyObject(req);
-      const validate = await this.model.getValidator().update(obj);
+      const validate = await this.model.getValidator().create(req.body);
+
+      if (!validate.passed) {
+        return next(
+          new AppError(lang.get('error').inputs, BAD_REQUEST, validate.errors)
+        );
+      }
+      const _obj = await processor.prepareBodyObject(req);
+      let _retrievedObj = await processor.retrieveExistingResource(
+        this.model,
+        _obj
+      );
+
+      if (_retrievedObj) {
+        const _returnDuplicateObj = this.model.returnDuplicate;
+        if (_returnDuplicateObj) {
+          req.response = {
+            message: this.lang.created,
+            model: this.model,
+            code: CREATED,
+            value: _retrievedObj,
+          };
+          return next();
+        } else {
+          const _messageObj = this.model.uniques.map((m: string) => ({
+            [m]: `${m} must be unique`,
+          }));
+          const appError = new AppError(
+            lang.get('error').resource_already_exist,
+            CONFLICT,
+            _messageObj
+          );
+          return next(appError);
+        }
+      } else {
+        let checkError = await processor.validateCreate(_obj);
+        if (checkError) {
+          return next(checkError);
+        }
+        _retrievedObj = await processor.createNewObject(_obj);
+      }
+      req.response = {
+        message: this.lang.created,
+        model: this.model,
+        code: CREATED,
+        value: await _retrievedObj,
+      };
+      // const postCreate = await processor.postCreateResponse(_retrievedObj, {
+      //   userId: req.userId,
+      //   model: this.model.collection.collectionName,
+      // });
+      // if (postCreate) {
+      //   req.response = Object.assign({}, req.response, postCreate);
+      // }
+      return next();
+    } catch (err) {
+      return next(err);
+    }
+  };
+
+  /**
+   * @param {Object} req The request object
+   * @param {Object} res The response object
+   * @param {Function} next The callback to the next program handler
+   * @return {Object} res The response object
+   */
+  update = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const processor = this.model.getProcessor(this.model);
+      let _object = req.object;
+      const _obj = await processor.prepareBodyObject(req);
+      const validate = await this.model.getValidator().update(_obj);
       if (!validate.passed) {
         const error = new AppError(
           lang.get('error').inputs,
@@ -211,9 +219,9 @@ class AppController {
       if (
         this.model.uniques &&
         this.model.uniques.length > 0 &&
-        !isEmpty(pick(obj, this.model.uniques))
+        !isEmpty(pick(_obj, this.model.uniques))
       ) {
-        let found = await processor.retrieveExistingResource(this.model, obj);
+        let found = await processor.retrieveExistingResource(this.model, _obj);
         if (found) {
           const messageObj = this.model.uniques.map((m: string) => ({
             [m]: `${m} must be unique`,
@@ -226,29 +234,29 @@ class AppController {
           return next(appError);
         }
       }
-      let canUpdateError = await processor.validateUpdate(object, obj);
+      let canUpdateError = await processor.validateUpdate(_object, _obj);
       if (!isEmpty(canUpdateError)) {
         return next(canUpdateError);
       }
-      object = await processor.updateObject(object, obj);
+      _object = await processor.updateObject(_object, _obj);
       req.response = {
         model: this.model,
         code: OK,
         message: this.lang.updated,
-        value: object,
+        value: _object,
       };
-      const postUpdate = await processor.postUpdateResponse(
-        object,
-        req.response
-      );
-      if (postUpdate) {
-        req.response = Object.assign({}, req.response, postUpdate);
-      }
+      // const postUpdate = await processor.postUpdateResponse(
+      //   object,
+      //   req.response
+      // );
+      // if (postUpdate) {
+      //   req.response = Object.assign({}, req.response, postUpdate);
+      // }
       return next();
     } catch (err) {
       return next(err);
     }
-  }
+  };
 
   /**
    * @param {Object} req The request object
@@ -256,7 +264,7 @@ class AppController {
    * @param {Function} next The callback to the next program handler
    * @return {Object} res The response object
    */
-  async status(req: T, res: T, next: (err?: any) => void) {
+  status = async (req: Request, res: Response, next: NextFunction) => {
     let object = req.object;
     object.active = req.params['status'];
     try {
@@ -270,7 +278,7 @@ class AppController {
     } catch (err) {
       return next(err);
     }
-  }
+  };
 
   /**
    * @param {Object} req The request object
@@ -278,7 +286,7 @@ class AppController {
    * @param {Function} next The callback to the next program handler
    * @return {Object} The response object
    */
-  async delete(req: T, res: T, next: (err?: any) => void) {
+  delete = async (req: Request, res: Response, next: NextFunction) => {
     let object = req.object;
     try {
       const processor = this.model.getProcessor(this.model);
@@ -298,17 +306,18 @@ class AppController {
         value: { _id: object._id },
         message: this.lang.deleted,
       };
-      const postDelete = await processor.postDeleteResponse(object, {
-        userId: req.userId,
-        model: this.model.collection.collectionName,
-      });
-      if (postDelete) {
-        req.response = Object.assign({}, req.response, postDelete);
-      }
+      // const postDelete = await processor.postDeleteResponse(object, {
+      //   userId: req.userId,
+      //   model: this.model.collection.collectionName,
+      // });
+      // if (postDelete) {
+      //   req.response = Object.assign({}, req.response, postDelete);
+      // }
       return next();
-
     } catch (err) {
       return next(err);
     }
-  }
+  };
 }
+
+export default AppController;

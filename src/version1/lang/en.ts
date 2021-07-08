@@ -6,15 +6,18 @@ export default {
     incorrect_verify_code: 'Incorrect verification code!',
     verification_successful: 'verification successful!',
     verify_unauthorized: 'You are not authorized to perform verification',
-    password_reset_unauthorized: 'You are not authorized to perform password reset',
-    password_reset_link_expired: 'Your reset link and code has expired, please request a new one',
+    password_reset_unauthorized:
+      'You are not authorized to perform password reset',
+    password_reset_link_expired:
+      'Your reset link and code has expired, please request a new one',
     account_does_not_exist: 'An account with this email does not exist',
-    verify_expired: 'Your verification link and code has expired, please request a new one',
+    verify_expired:
+      'Your verification link and code has expired, please request a new one',
     account_verified: 'Your account has already been verified',
     social_error: 'Sorry we cannot verify your social account at the moment',
     verify_email_sent: 'An email has been sent to you',
     incorrect_password: 'Operation failed, incorrect password!',
-    email_does_not_exist: 'Email does not exist'
+    email_does_not_exist: 'Email does not exist',
   },
   error: {
     server: 'Error in setup interaction',
@@ -26,7 +29,7 @@ export default {
     not_auth_token: 'No authorization token provided',
     not_found: 'Resource not found',
     no_update_input: 'Nothing to update',
-    user_assigned_already: 'User already assigned to this investment group'
+    user_assigned_already: 'User already assigned to this investment group',
   },
   users: {
     created: 'User successfully created',
@@ -38,12 +41,18 @@ export default {
     username_does_not_exist: 'Username does not exist',
     psnid_does_not_exist: 'psn Id does not exist',
     username_exist: 'Username already exist',
-    psnId_exist: 'psnId already exist'
+    psnId_exist: 'psnId already exist',
+  },
+  samples: {
+    created: 'Samples successfully created',
+    updated: 'Samples successfully updated',
+    deleted: 'Samples successfully deleted',
+    not_found: 'Samples not found',
   },
   logs: {
     created: 'Log successfully created',
     updated: 'Log successfully updated',
     deleted: 'Log successfully deleted',
-    not_found: 'Log not found'
+    not_found: 'Log not found',
   },
-}
+};

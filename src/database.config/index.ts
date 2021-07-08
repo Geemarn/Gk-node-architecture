@@ -16,11 +16,10 @@ export default () => {
   }
 
   // return promise after connection to db
-  return mongoose
-    .connect(databaseUrl, {
-      useCreateIndex: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false
-    });
-}
+  return mongoose.connect(databaseUrl, {
+    useCreateIndex: true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+  });
+};

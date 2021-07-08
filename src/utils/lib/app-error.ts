@@ -1,6 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
-
-type T = Record<string, any>;
+import { T } from '../../version1/rest/types';
 
 type formatType = {
   code: number;
@@ -99,4 +98,3 @@ export class AppError extends Error {
     return obj;
   }
 }
-

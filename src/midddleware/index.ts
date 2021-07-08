@@ -1,7 +1,5 @@
 import errorHandler from './errorHandler';
-import apiValidation from './api';
+import apiKeyValidation from './apiKey';
+import response from './response';
 
-export {
-  errorHandler,
-  apiValidation
-}
+export { errorHandler, apiKeyValidation, response };

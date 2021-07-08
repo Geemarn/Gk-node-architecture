@@ -1,9 +1,12 @@
 import config from 'config';
-import {errorHandler, apiValidation} from './midddleware';
-import { Application } from 'express';
-import version1 from './Version1';
+import { errorHandler } from './midddleware';
+import { Application, NextFunction, Response, Request } from 'express';
+import {apiKeyValidation} from './midddleware';
+import v1 from './version1';
 import { AppError } from './utils/lib';
 import { NOT_FOUND } from './utils/constant';
+import { T } from './version1/rest/types';
+
 
 const prefix: (string | RegExp)[] = config.get('api.prefix');
 
@@ -13,22 +16,21 @@ const prefix: (string | RegExp)[] = config.get('api.prefix');
  * @return {Promise<void>}
  */
 export default async (app: Application) => {
-
   // check if api key is present
-  app.use(prefix, apiValidation);
+  app.use(prefix, apiKeyValidation);
 
   // load version 1 routes
-  app.use('/v1', version1);
+  app.use('/v1', v1);
 
   // check url for state codes and api version
-  app.use((req, res, next) => {
-    const err: Record<string, any> = new Error('Not Found');
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const err: T = new Error('Not Found');
     err.status = 404;
     next(err);
   });
 
   // check if url contains empty request
-  app.use('*', (req, res, next) => {
+  app.use('*', (req: Request, res: Response, next: NextFunction) => {
     return next(new AppError('not found', NOT_FOUND));
   });
 
@@ -36,4 +38,4 @@ export default async (app: Application) => {
   app.use(errorHandler);
 
   return Promise.resolve(app);
-}
+};

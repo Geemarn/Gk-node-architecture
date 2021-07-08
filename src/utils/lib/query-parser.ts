@@ -1,11 +1,11 @@
-import {assignIn, omit, isString, isObject} from 'lodash';
+import { assignIn, omit, isString, isObject } from 'lodash';
 
 export class QueryParser {
-   _query: Record<string, any>;
-   _all: Record<string, any>;
-   _sort: string | Record<string, any> | any;
-   _population: string | never[] | undefined;
-   _search: Record<string, any> | undefined;
+  _query: Record<string, any>;
+  _all: Record<string, any>;
+  _sort: string | Record<string, any> | any;
+  _population: string | never[] | undefined;
+  _search: Record<string, any> | undefined;
 
   /**
    * @constructor
@@ -24,13 +24,18 @@ export class QueryParser {
     }
 
     const excluded = [
-      'perPage', 'page', 'limit', 'sort', 'all',
-      'population', 'search'
+      'perPage',
+      'page',
+      'limit',
+      'sort',
+      'all',
+      'population',
+      'search',
     ];
     // omit special query string keys from query before passing down to the model for filtering
     this._query = omit(this._query, ...excluded);
     // Only get collection that has not been virtually deleted.
-    assignIn(this._query, {deleted: false});
+    assignIn(this._query, { deleted: false });
 
     Object.assign(this, this._query);
   }
@@ -93,16 +98,16 @@ export class QueryParser {
         try {
           this._sort = JSON.parse(this._sort);
         } catch (e) {
-          return {[this._sort]: 1}
+          return { [this._sort]: 1 };
         }
       }
       for (const [column, direction] of Object.entries(this._sort)) {
         if (isString(direction))
-          this._sort[column] = (direction.toLowerCase() === 'asc') ? 1 : -1;
+          this._sort[column] = direction.toLowerCase() === 'asc' ? 1 : -1;
       }
       return this._sort;
     }
-    return {createdAt: -1};
+    return { createdAt: -1 };
   }
 
   /**
@@ -111,6 +116,4 @@ export class QueryParser {
   get getAll() {
     return this._all;
   }
-
 }
-

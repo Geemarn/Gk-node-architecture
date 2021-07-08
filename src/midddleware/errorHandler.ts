@@ -1,9 +1,10 @@
 import config from 'config';
 import { AppError } from '../utils/lib';
+import { T } from '../version1/rest/types';
+import { Request, Response, NextFunction } from 'express';
 
-type T = Record<string, any>;
 
-export default (error: T, req: T, res: T, next: (err?: any) => void) => {
+export default (error: T, req: Request, res: Response, next: NextFunction) => {
   const meta: T = {};
   if (error instanceof AppError) {
     const err = error.format();
